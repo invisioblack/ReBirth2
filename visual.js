@@ -20,11 +20,10 @@ module.exports = function () {
         if (!config.visuals.sayStatus)
             return;
 
-       let roleSay = config.visuals.roleSay[this.memory.role] + ': ' + this.carry[RESOURCE_ENERGY];
-
+        let roleSay = config.visuals.roleSay[this.memory.role] + ': ' + this.carry[RESOURCE_ENERGY];
         this.room.visual.speech(roleSay, this.pos.x, this.pos.y, this);
 
-        };
+    };
 
     RoomVisual.prototype.creepPathStyle = function (creep) {
 
@@ -44,6 +43,38 @@ module.exports = function () {
             width: 0.15,
             opacity: 0.5
         };
+    };
+
+
+
+    RoomVisual.prototype.speech = function (text, x, y, creep) {
+
+        let pointer = [
+                [-0.2, -0.8],
+                [0.2, -0.8],
+                [0, -0.3]
+            ],
+            speechSize = 0.5,
+            speechFont = 'Times New Roman';
+
+        pointer = relPoly(x, y, pointer);
+        pointer.push(pointer[0]);
+
+
+        this.poly(pointer, {
+            fill: creep.memory.pathColour,
+            stroke: creep.memory.pathColour,
+            opacity: 1,
+            strokeWidth: 0.1
+        });
+
+        this.text(text, x, y - 1, {
+            color: config.visuals.colors.speechText,
+            backgroundColor: creep.memory.pathColour,
+            backgroundPadding: 0.1,
+            opacity: 0.8,
+            font: speechSize + ' ' + speechFont
+        })
     };
 
     RoomVisual.prototype.structure = function (x, y, type, opts = {}) {
@@ -323,36 +354,6 @@ module.exports = function () {
                 });
                 break;
         }
-    };
-
-    RoomVisual.prototype.speech = function (text, x, y, creep) {
-
-        let pointer = [
-                [-0.2, -0.8],
-                [0.2, -0.8],
-                [0, -0.3]
-            ],
-            speechSize = 0.5,
-            speechFont = 'Times New Roman';
-
-        pointer = relPoly(x, y, pointer);
-        pointer.push(pointer[0]);
-
-
-        this.poly(pointer, {
-            fill: creep.memory.pathColour,
-            stroke: creep.memory.pathColour,
-            opacity: 1,
-            strokeWidth: 0.1
-        });
-
-        this.text(text, x, y - 1, {
-            color: config.visuals.colors.speechText,
-            backgroundColor: creep.memory.pathColour,
-            backgroundPadding: 0.1,
-            opacity: 0.8,
-            font: speechSize + ' ' + speechFont
-        })
     };
 
 
