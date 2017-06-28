@@ -2,9 +2,6 @@
 
 module.exports = function () {
 
-    if (!Creep.prototype._harvest)
-        Creep.prototype._harvest = Creep.prototype.harvest;
-
 
     Creep.prototype.roleHarvester = function () {
 
@@ -110,11 +107,7 @@ module.exports = function () {
 
     };
 
-    Creep.prototype.harvest = function () {
 
-
-
-    }
 
 
 

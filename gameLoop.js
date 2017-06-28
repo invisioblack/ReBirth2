@@ -34,7 +34,6 @@ module.exports = function () {
         if (!creep.spawning) {
 
             // sayStatus
-
             creep.sayStatus();
 
             // set preSpawn
