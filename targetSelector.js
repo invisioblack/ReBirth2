@@ -30,8 +30,6 @@ module.exports = function () {
         let energyConsumers = this.room.mySpawns.concat(this.room.myExtensions),
             target;
 
-
-
         target = _.filter(energyConsumers, function (energyConsumer) {
 
             if (energyConsumer.structureType === STRUCTURE_EXTENSION)
@@ -41,15 +39,16 @@ module.exports = function () {
 
         });
 
-
         if (target.length === 1)
             target = target[0];
         else if (target.length > 1)
             target = this.pos.findClosestByPath(target);
 
-        console.log(target);
-
-        this.memory.target = target.id;
+        if (target !== undefined) {
+            this.memory.target = target.id;
+            return true;
+        } else
+            return false;
     };
 
 };

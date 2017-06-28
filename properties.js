@@ -95,6 +95,29 @@ Object.defineProperty(Room.prototype, 'sources', {
     configurable: true
 });
 
+Object.defineProperty(Room.prototype, 'minerals', {
+    get: function () {
+        if (this === Room.prototype || this === undefined)
+            return;
+
+        if (!this._minerals)
+
+            if (!this.memory.mineral)
+                this.memory.mineral = this.find(FIND_MINERALS).map(mineral => mineral.id);
+        if (this.memory.mineral){
+            this._minerals = this.memory.mineral.map(id => Game.getObjectById(id));
+            return this._minerals;
+        }
+
+    },
+    set: function (value) {
+        this.memory.minerals = value.map(mineral => mineral.id);
+        this._mineral = value;
+    },
+    enumerable: false,
+    configurable: true
+});
+
 Object.defineProperty(Room.prototype, 'myStructures', {
     get: function () {
         if (this === Room.prototype || this === undefined)
@@ -104,6 +127,22 @@ Object.defineProperty(Room.prototype, 'myStructures', {
             this._myStructures = this.find(FIND_MY_STRUCTURES);
 
         return this._myStructures;
+    },
+    enumerable: false,
+    configurable: true
+});
+
+Object.defineProperty(Room.prototype, 'towers', {
+    get: function () {
+        if (this === Room.prototype || this === undefined)
+            return;
+
+        if (!this._towers)
+            this._towers = _.filter(this.myStructures, function (structure) {
+                return structure.structureType === STRUCTURE_TOWER
+            });
+
+        return this._towers;
     },
     enumerable: false,
     configurable: true
@@ -365,6 +404,45 @@ Object.defineProperty(StructureExtension.prototype, 'busy', {
     },
     enumerable: false,
     configurable: true
+});
+
+// ---------------------  VISUAL ---------------------
+
+Object.defineProperties(RoomVisual.prototype, {
+    barStyle: {
+        configurable: true,
+        value: {fill: '#2B2B2B', opacity: 0.8, stroke: '#000000', font: 0.5}
+    },
+    sparklineStyle: {
+        configurable: true,
+        value: [{
+            key: 'limit',
+            min: Game.cpu.limit * 0.5,
+            max: Game.cpu.limit * 1.5,
+            stroke: '#808080',
+            opacity: 0.25
+        }, {
+            key: 'cpu',
+            min: Game.cpu.limit * 0.5,
+            max: Game.cpu.limit * 1.5,
+            stroke: '#FFFF00',
+            opacity: 0.5
+        }, {
+            key: 'bucket',
+            min: 0,
+            max: 10000,
+            stroke: '#00FFFF',
+            opacity: 0.5
+        }]
+    },
+    tooltipStyle: {
+        configurable: true,
+        value: {align: 'left', font: 0.5}
+    },
+    weakestStyle: {
+        configurable: true,
+        value: {radius: 0.4, fill: '#FF0000', opacity: 0.3, strokeWidth: 0}
+    }
 });
 
 

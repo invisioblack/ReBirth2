@@ -1,14 +1,6 @@
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 'use strict';
 
-function bodySize(bodyPlans) {
-
-    let bodySize = 0;
-    Object.keys(bodyPlans).forEach(parts => {
-        bodySize += creepProp.partSize[parts] * bodyPlans[parts];
-    });
-    return bodySize;
-}
 
 module.exports = function () {
 
@@ -200,11 +192,9 @@ module.exports = function () {
                         for (let i = 0; i < bodyParts[parts]; i++)
                             finalBody.push(parts);
                     });
-                //if (this.room.name === 'W8N9')
-                //    console.log(roleName, finalBody.length);
 
                 // create creep with the created body and the given role
-                return this.createCreep(finalBody, null, {
+                return this.createCreep(finalBody, getName(roleName), {
                     role: roleName,
                     subRole: '---',
                     working: false,
@@ -212,6 +202,30 @@ module.exports = function () {
                     homeroom: this.room.name,
                 });
             }
+
+
+            function bodySize(bodyPlans) {
+
+                let bodySize = 0;
+                Object.keys(bodyPlans).forEach(parts => {
+                    bodySize += creepProp.partSize[parts] * bodyPlans[parts];
+                });
+                return bodySize;
+            }
+
+            function getName(role) {
+                let isNameTaken,
+                    tries = 0;
+
+                do {
+                    tries++;
+                    isNameTaken = Game.creeps[role + '_' + tries] !== undefined;
+                } while (isNameTaken);
+
+
+                return role + '_' + tries;
+            }
+
         };
 
 };

@@ -2,10 +2,12 @@
 require('./room')();
 require('./buildStructures')();
 require('./roleScan')();
-require('./roleManager')();
+require('./roles')();
+require('./task')();
 require('./memory')();
 require('./targetSelector')();
 require('./visual')();
+require('./visualRoom')();
 require('./spawner')();
 require('./properties');
 require('./functions');
@@ -19,6 +21,13 @@ global.Traveller = require('./Traveler');
 global.config = {
     profiler: {
         enabled : false
+    },
+    test: {
+        role: {
+            active: true,
+            roleName: 'harvester',
+            minimumSpawnOf: 1
+        }
     },
     extraCreeps: false,
     delay: {
@@ -35,12 +44,31 @@ global.config = {
         upgrade: 3
     },
     allies: ['XXX'],
-
-
+    errorCodes: {
+        OK: 0,
+        ERR_NOT_OWNER: -1,
+        ERR_NO_PATH: -2,
+        ERR_NAME_EXISTS: -3,
+        ERR_BUSY: -4,
+        ERR_NOT_FOUND: -5,
+        ERR_NOT_ENOUGH_SOMETHING: -6,
+        ERR_INVALID_TARGET: -7,
+        ERR_FULL: -8,
+        ERR_NOT_IN_RANGE: -9,
+        ERR_INVALID_ARGS: -10,
+        ERR_TIRED: -11,
+        ERR_NO_BODYPART: -12,
+        ERR_RCL_NOT_ENOUGH: -14,
+        ERR_GCL_NOT_ENOUGH: -15
+    },
     visuals: {
-
         highlightStructure: true,
         sayStatus: true,
+        roomVisual: true,
+        room: true,
+        global: true,
+        cpu: true,
+        allRooms: true,
         colors: {
             gray: '#555555',
             light: '#AAAAAA',
@@ -50,8 +78,17 @@ global.config = {
             dark: '#181818',
             outline: '#8FBB93',
             speechText: '#000000',
-            speechBackground: '#2ccf3b'
+            //speechBackground: '#2ccf3b',
+            7: '#b01028',
+            6: '#c5ce3d',
+            5: '#26ab3d',
+            4: '#809fff',
+            3: '#999999',
+            2: '#737373',
+            1: '#666666',
+            0: '#ffffff'
         },
+
         roleSay: {
             harvester: String.fromCodePoint(0x26CF), // ⛏
             miner: String.fromCodePoint(0x26CF), // ⛏
@@ -105,7 +142,6 @@ global.creepProp = {
     },
     bodyPlans: {
         upgrader: {
-
             default: { // 300
                 work: 1, // 100
                 carry: 2, // 100

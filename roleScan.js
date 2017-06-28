@@ -113,7 +113,12 @@ module.exports = function () {
         // count creeps
         Object.keys(creep).forEach(role => {
             currentCreep = _.filter(this.room.myCreeps, {memory: {role: role}});
+
             creep[role].numberOf = currentCreep.length;
+
+            if (config.test.role.active && role === config.test.role.roleName)
+                creep[role].minimumSpawnOf = config.test.role.minimumSpawnOf;
+
             if (creep[role].preSpawn)
                 creep[role].numberOfPreSpawn = _.filter(currentCreep, (function (creep) {
                     return creep.ticksToLive <= creep.memory.preSpawn;
@@ -129,68 +134,68 @@ module.exports = function () {
         for (let structure in ALL_STORAGE)
             plusEnergy += ALL_STORAGE[structure].store[RESOURCE_ENERGY];
 
-
-
-
         // determining spawn role
 
-        // start with upgrader
-        if (RCL === 1 && NUMBER_OF_CREEPS === 0)
-            roleName = 'upgrader';
-        // emergency harvester/hauler
-        else if (creep.harvester.numberOf === 0 && creep.stationaryHarvester.numberOf === 0 && energyAvailable >= 300) {
-            energyCapacity = energyAvailable;
-            roleName = 'harvester';
-        } else if (creep.hauler.numberOf === 0  && energyAvailable >= 200 && creep.hauler.minimumSpawnOf > 0
-            && (creep.stationaryHarvester.numberOf > 0 || (creep.remoteStationaryHarvester.numberOf > 0 && creep.remoteHauler.numberOf > 0))) {
-            energyCapacity = energyAvailable;
-            roleName = 'hauler';
-        } else {
-            for (let role in creep)
-                if (creep[role].preSpawn) {
-                if (creep[role].numberOf < creep[role].minimumSpawnOf
-                    || (creep[role].numberOfPreSpawn > 0 && creep[role].numberOf <= creep[role].minimumSpawnOf)) {
-                    roleName = role;
-                    break;
-                }
-            } else if (creep[role].numberOf < creep[role].minimumSpawnOf) {
-                roleName = role;
-                break;
-            }
-        }
-
-        // determining extra creep roles
-        if (config.extraCreeps && roleName === undefined && HOSTILES.length === 0 && plusEnergy > energyCapacity * 2 && RCL >= 2 && RCL <= 5) {
-
-            extraRoles = ['upgrader', 'wallRepairer', 'repairer'];
-
-            switch (RCL) {
-
-                case 5:
-                    extraCreepNumber = Math.ceil(NUMBER_OF_SOURCES / 2);
-                    break;
-
-                case 4:
-                    extraCreepNumber = NUMBER_OF_SOURCES;
-                    break;
-
-                case 3:
-                    extraCreepNumber = NUMBER_OF_SOURCES + 1;
-                    break;
-
-                case 2:
-                    creep.stationaryHarvester.numberOf === NUMBER_OF_SOURCES ? extraCreepNumber = 7 + NUMBER_OF_SOURCES - Math.floor(energyCapacity / 100) : 5 + NUMBER_OF_SOURCES - Math.floor(energyCapacity / 100);
-                    break;
-            }
-
-            for (let role of extraRoles) {
-
-                if (creep[role].numberOf < creep[role].minimumSpawnOf + extraCreepNumber) {
+        if (!config.test.role) {
+            // start with upgrader
+            if (RCL === 1 && NUMBER_OF_CREEPS === 0)
+                roleName = 'upgrader';
+            // emergency harvester/hauler
+            else if (creep.harvester.numberOf === 0 && creep.stationaryHarvester.numberOf === 0 && energyAvailable >= 300) {
+                energyCapacity = energyAvailable;
+                roleName = 'harvester';
+            } else if (creep.hauler.numberOf === 0 && energyAvailable >= 200 && creep.hauler.minimumSpawnOf > 0
+                && (creep.stationaryHarvester.numberOf > 0 || (creep.remoteStationaryHarvester.numberOf > 0 && creep.remoteHauler.numberOf > 0))) {
+                energyCapacity = energyAvailable;
+                roleName = 'hauler';
+            } else {
+                for (let role in creep)
+                    if (creep[role].preSpawn) {
+                    if (creep[role].numberOf < creep[role].minimumSpawnOf
+                        || (creep[role].numberOfPreSpawn > 0 && creep[role].numberOf <= creep[role].minimumSpawnOf)) {
+                        roleName = role;
+                        break;
+                    }
+                } else if (creep[role].numberOf < creep[role].minimumSpawnOf) {
                     roleName = role;
                     break;
                 }
             }
-        }
+
+            // determining extra creep roles
+            if (config.extraCreeps && roleName === undefined && HOSTILES.length === 0 && plusEnergy > energyCapacity * 2 && RCL >= 2 && RCL <= 5) {
+
+                extraRoles = ['upgrader', 'wallRepairer', 'repairer'];
+
+                switch (RCL) {
+
+                    case 5:
+                        extraCreepNumber = Math.ceil(NUMBER_OF_SOURCES / 2);
+                        break;
+
+                    case 4:
+                        extraCreepNumber = NUMBER_OF_SOURCES;
+                        break;
+
+                    case 3:
+                        extraCreepNumber = NUMBER_OF_SOURCES + 1;
+                        break;
+
+                    case 2:
+                        creep.stationaryHarvester.numberOf === NUMBER_OF_SOURCES ? extraCreepNumber = 7 + NUMBER_OF_SOURCES - Math.floor(energyCapacity / 100) : 5 + NUMBER_OF_SOURCES - Math.floor(energyCapacity / 100);
+                        break;
+                }
+
+                for (let role of extraRoles) {
+
+                    if (creep[role].numberOf < creep[role].minimumSpawnOf + extraCreepNumber) {
+                        roleName = role;
+                        break;
+                    }
+                }
+            }
+        } else if (creep[config.test.role.roleName].numberOf < creep[config.test.role.roleName].minimumSpawnOf)
+            roleName = config.test.role.roleName;
 
         // spawning
         if (roleName !== undefined) {
@@ -206,7 +211,7 @@ module.exports = function () {
                 returnCode = this.createCustomCreep(energyCapacity, roleName, creep.remoteStationaryHarvester.numberOf);
 
             if (returnCode !== OK && returnCode !== ERR_NOT_ENOUGH_ENERGY && !_.isString(returnCode))
-                console.log('Spawning error:', this.room.name, roleName, returnCode);
+                console.log('Spawning error:', this.room.name, roleName, findErrorCode(returnCode));
         }
     };
 };

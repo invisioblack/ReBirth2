@@ -3,6 +3,7 @@
  * Example: var Traveler = require('Traveler.js');
  */
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });															  
 class Traveler {
     /**
      * move creep to destination
@@ -21,7 +22,7 @@ class Traveler {
         //creep.memory.target = destination.id;
 
         if (creep.fatigue > 0) {
-            Traveler.circle(creep.pos, "aqua", .3);
+            Traveler.circle(creep.pos, creep.memory.pathColour, .3);
             return ERR_BUSY;
         }
         destination = this.normalizePos(destination);
@@ -95,11 +96,9 @@ class Traveler {
                 // see note at end of file for more info on this
                 console.log(`TRAVELER: heavy cpu use: ${creep.name}, cpu: ${state.cpu} origin: ${creep.pos}, dest: ${destination}`);
             }
-            let color = "orange";
             if (ret.incomplete) {
                 // uncommenting this is a great way to diagnose creep behavior issues
                 console.log(`TRAVELER: incomplete path for ${creep.name}`);
-                color = "red";
             }
             if (options.returnData) {
                 options.returnData.pathfinderReturn = ret;
@@ -145,7 +144,7 @@ class Traveler {
      * @returns {RoomMemory|number}
      */
     static checkAvoid(roomName) {
-        return Memory.rooms[roomName] && Memory.rooms[roomName].avoid;
+        return Memory.rooms && Memory.rooms[roomName] && Memory.rooms[roomName].avoid;
     }
     /**
      * check if a position is an exit
@@ -421,7 +420,7 @@ class Traveler {
         let impassibleStructures = [];
         for (let structure of room.find(FIND_STRUCTURES)) {
             if (structure instanceof StructureRampart) {
-                if (!structure.my) {
+                if (!structure.my && !structure.isPublic) {
                     impassibleStructures.push(structure);
                 }
             } else if (structure instanceof StructureRoad) {
