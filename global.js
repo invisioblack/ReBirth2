@@ -78,7 +78,6 @@ global.config = {
             dark: '#181818',
             outline: '#8FBB93',
             speechText: '#000000',
-            //speechBackground: '#2ccf3b',
             7: '#b01028',
             6: '#c5ce3d',
             5: '#26ab3d',
@@ -88,7 +87,6 @@ global.config = {
             1: '#666666',
             0: '#ffffff'
         },
-
         roleSay: {
             harvester: String.fromCodePoint(0x26CF), // ⛏
             miner: String.fromCodePoint(0x26CF), // ⛏
