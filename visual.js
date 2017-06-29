@@ -45,6 +45,44 @@ module.exports = function () {
         };
     };
 
+    RoomVisual.prototype.connectRoads = function (opts={}) {
+
+        const dirs = [
+         [],
+         [0, -1],
+         [1, -1],
+         [1, 0],
+         [1, 1],
+         [0, 1],
+         [-1, 1],
+         [-1, 0],
+         [-1, -1]
+        ];
+
+        let color = config.visuals.colors.road;
+
+        if (!this.roads)
+         return;
+        // this.text(this.roads.map(r=>r.join(',')).join(' '),25,23)
+        this.roads.forEach(r=> {
+            // this.text(`${r[0]},${r[1]}`,r[0],r[1],{ size: 0.2 })
+            for (let i = 1; i <= 4; i++) {
+                let d = dirs[i];
+                let c = [r[0] + d[0], r[1] + d[1]];
+                let rd = _.some(this.roads, r => r[0] === c[0] && r[1] === c[1]);
+                // this.text(`${c[0]},${c[1]}`,c[0],c[1],{ size: 0.2, color: rd?'green':'red' })
+                if (rd) {
+                    this.line(r[0], r[1], c[0], c[1], {
+                        color: color,
+                        width: 0.35,
+                        opacity: opts.opacity || 1
+                    })
+                }
+            }
+        })
+    };
+
+
 
 
     RoomVisual.prototype.speech = function (text, x, y, creep) {
