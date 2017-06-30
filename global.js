@@ -1,9 +1,7 @@
 
 require('./room')();
-require('./buildStructures')();
 require('./roleScan')();
 require('./roles')();
-require('./task')();
 require('./memory')();
 require('./targetSelector')();
 require('./visual')();
@@ -11,10 +9,12 @@ require('./visualRoom')();
 require('./spawner')();
 require('./properties');
 require('./functions');
+require('./queueAction');
 
 global.gameLoop = require('./gameLoop');
 global.profiler = require('./screeps-profiler');
 global.Traveller = require('./Traveler');
+global.task = require('./task');
 
 
 
@@ -27,6 +27,9 @@ global.config = {
             active: true,
             roleName: 'harvester',
             minimumSpawnOf: 1
+        },
+        build: {
+            road: true
         }
     },
     extraCreeps: false,

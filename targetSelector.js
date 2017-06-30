@@ -1,54 +1,60 @@
 "use strict";
 module.exports = function () {
 
-    Creep.prototype.targetSource = function () {
-
-        let sources = this.room.sources,
-            target;
-
-        if (sources.length === 1)
-            target = sources[0].freeSpot;
-        else {
-
-            target = _.filter(sources, function (source) {
-                return source.freeSpot === true;
-            });
-
-            if (target.length > 1)
-                target = this.pos.findClosestByPath(target);
-            else if (target.length === 1)
-                target = target[0];
-
-        }
-
-        this.memory.target = target.id;
-
-    };
-
-    Creep.prototype.targetDistributeEnergy = function () {
-
-        let energyConsumers = this.room.mySpawns.concat(this.room.myExtensions),
-            target;
-
-        target = _.filter(energyConsumers, function (energyConsumer) {
-
-            if (energyConsumer.structureType === STRUCTURE_EXTENSION)
-                return energyConsumer.energy < energyConsumer.energyCapacity && !energyConsumer.busy;
+    RoomObject.prototype.getTarget = function (selector, validator = _.identity, chooser = _.first, prop = 'target') {
+        let tid = this.memory[prop];
+        let target = Game.getObjectById(tid);
+        if (target === null || !validator(target)) {
+            let candidates = _.filter(selector.call(this, this), validator);
+            if (candidates && candidates.length)
+                target = chooser(candidates, this);
             else
-                return energyConsumer.energy < energyConsumer.energyCapacity;
-
-        });
-
-        if (target.length === 1)
-            target = target[0];
-        else if (target.length > 1)
-            target = this.pos.findClosestByPath(target);
-
-        if (target !== undefined) {
-            this.memory.target = target.id;
-            return true;
-        } else
-            return false;
+                target = null;
+            if (target) {
+                this.memory[prop] = target.id;
+                console.log(`New target on tick ${Game.time}: ${target}`);
+            } else
+                delete this.memory[prop];
+        }
+        if (target)
+            target.room.visual.line(this.pos, target.pos, {lineStyle: 'dashed', opacity: 0.5});
+        return target;
     };
+
+    RoomObject.prototype.getUniqueTarget = function (selector, restrictor, validator=_.identity, chooser=_.first, prop='target') {
+        let tid = this.memory[prop];
+        let target = Game.getObjectById(tid);
+        if (target === null || !validator(target)) {
+            this.clearTarget(prop);
+            let invalid = restrictor.call(this, this) || [];
+            let candidates = _.filter(selector.call(this, this), x => validator(x) && !invalid.includes(x.id));
+            if (candidates && candidates.length)
+                target = chooser(candidates, this);
+            else
+                target = null;
+            if (target)
+                this.memory[prop] = target.id;
+            console.log(`New target on tick ${Game.time}: ${target}`);
+        }
+        if (target)
+            target.room.visual.line(this.pos, target.pos, {lineStyle: 'dashed', opacity: 0.5});
+        return target;
+    };
+
+    RoomObject.prototype.clearTarget = function (prop='target') {
+        // delete this.memory[prop];
+        this.memory[prop] = undefined;
+    };
+
+    Creep.prototype.getHarvestTarget = function () {
+        return this.getTarget(
+            (room) => this.room.sources,
+            (sources) => sources.energy > 0 && sources.freeSpot,
+            (candidates) => _.max(candidates, 'energy')
+        );
+    }
+
+
+
 
 };

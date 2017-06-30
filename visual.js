@@ -115,6 +115,40 @@ module.exports = function () {
         })
     };
 
+    RoomVisual.prototype.animatedPosition = function (x, y, opts={}) {
+
+        function rotate(x, y, s, c, px, py) {
+            let xDelta = x * c - y * s;
+            let yDelta = x * s + y * c;
+            return { x: px + xDelta, y: py + yDelta };
+        }
+
+        let color = !!opts.color ? opts.color : 'blue';
+        let opacity = !!opts.opacity ? opts.opacity : 0.5;
+        let radius = !!opts.radius ? opts.radius : 0.75;
+        let frames = !!opts.frames ? opts.frames : 6;
+
+
+        let angle = (Game.time % frames * 90 / frames) * (Math.PI / 180);
+        let s = Math.sin(angle);
+        let c = Math.cos(angle);
+
+        let sizeMod = Math.abs(Game.time % frames - frames / 2) / 10;
+        radius += radius * sizeMod;
+
+        let points = [
+            rotate(0, -radius, s, c, x, y),
+            rotate(radius, 0, s, c, x, y),
+            rotate(0, radius, s, c, x, y),
+            rotate(-radius, 0, s, c, x, y),
+            rotate(0, -radius, s, c, x, y),
+        ];
+
+        return this.poly(points, {stroke: color, opacity: opacity});
+    };
+
+
+
     RoomVisual.prototype.structure = function (x, y, type, opts = {}) {
         opts = Object.assign({
             opacity: 1

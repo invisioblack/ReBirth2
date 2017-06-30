@@ -6,17 +6,23 @@ module.exports = function () {
     Room.prototype.buildRoads = function () {
 
         // build roads
+
+
         let rcl = this.controller.level,
             tier = 'RCL_' + String(rcl);
 
         if (rcl >= 2 && rcl <= 5) {
 
-            if (this.memory.roads === undefined)
+            if (this.memory.roads === undefined && !config.test.build.road)
                 this.memory.roads = {};
 
             if (this.memory.roads[tier] === undefined
-                || (this.memory.roads[tier] !== undefined && this.memory.roads[tier] === false && Game.time % config.delay.roadBuilding === 0))
-                this.memory.roads[tier] = this.createRoads();
+                || (this.memory.roads[tier] !== undefined && this.memory.roads[tier] === false && Game.time % config.delay.roadBuilding === 0)){
+                if (!config.test.build.road)
+                    this.memory.roads[tier] = this.createRoads();
+                else
+                    console.log(this.memory.roads[tier], this.createRoads());
+            }
         }
     };
 
@@ -80,7 +86,12 @@ module.exports = function () {
 
             for (let path of paths) {
                 for (let position of path) {
-                    returnCode = this.createConstructionSite(position, STRUCTURE_ROAD);
+                    if (!config.test.build.road)
+                        returnCode = this.createConstructionSite(position, STRUCTURE_ROAD);
+                    else {
+                        this.visual.circle(pos);
+                        returnCode = OK;
+                    }
                     if (returnCode === OK)
                         constructionSitesCreated++
                 }

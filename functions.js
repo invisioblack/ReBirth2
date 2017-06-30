@@ -87,8 +87,34 @@ global.findErrorCode = function (status) {
         let status = original.apply(this, arguments);
 
         if (typeof status === 'number' && status < 0 && status !== -9 && status !== 11)
-            console.log(this.name, textColor('action'), textColor(method, 6), textColor('failed with status'), textColor(findErrorCode(status), 7), textColor('at'), textColor(this.pos, 5));
+            console.log(this.toString(), textColor('action'), textColor(method, 6), textColor('failed with status'), textColor(findErrorCode(status), 7));
 
         return status;
     }
 });
+
+RoomPosition.prototype.toString = function (htmlLink = true, id = undefined, memWatch = undefined) {
+    if (htmlLink) {
+        let onClick = '';
+        if (id)       onClick += `angular.element('body').injector().get('RoomViewPendingSelector').set('${id}');`;
+        if (memWatch) onClick += `angular.element($('section.memory')).scope().Memory.addWatch('${memWatch}');angular.element($('section.memory')).scope().Memory.selectedObjectWatch='${memWatch}';`
+        return `<a href="#!/room/${this.roomName}" onClick="${onClick}">[${ this.roomName } ${ this.x },${ this.y }]</a>`;
+    }
+    return `[${ this.roomName } ${ this.x },${ this.y }]`;
+};
+
+Creep.prototype.toString = function (htmlLink = true) {
+    return `[${(this.name ? this.name : this.id)} ${this.pos.toString(htmlLink, this.id, 'creeps.' + this.name)}]`;
+};
+
+Structure.prototype.toString = function (htmlLink = true) {
+    return `[structure (${this.structureType}) #${this.id} ${this.pos.toString(htmlLink, this.id, 'structures.' + this.id)}]`;
+};
+
+StructureSpawn.prototype.toString = function (htmlLink = true) {
+    return `[structure (${this.structureType}) #${this.id} ${this.pos.toString(htmlLink, this.id, 'spawns.' + this.name)}]`;
+};
+
+Flag.prototype.toString = function (htmlLink = true) {
+    return `[flag ${this.name} ${this.pos.toString(htmlLink, this.name, 'flags.' + this.name)}]`;
+};

@@ -1,5 +1,7 @@
 "use strict";
 
+//queueAction('task.harvest()', 'OK', 100);
+
 module.exports = function () {
 
 
@@ -8,17 +10,17 @@ module.exports = function () {
 
     let rooms,
         spawns,
-        tier,
-        rcl,
         currentRoom;
 
     garbageCollector();
+
+    runQueuedActions();
 
 
     // spawning, roadBuilding
     for (let room of MY_ROOMS) {
 
-        //room.buildRoads();
+        room.buildRoads();
 
         // role scan
         spawns = room.mySpawns;
@@ -45,11 +47,6 @@ module.exports = function () {
             // set preSpawn
             if (creep.memory.preSpawn === undefined)
                 creep.memory.preSpawn = creep.body.length * 3;
-
-            if (creep.memory.role === 'harvester')
-                creep.roleHarvester();
-            else if (creep.memory.role === 'upgrader')
-                creep.roleUpgrader();
 
         }
     });

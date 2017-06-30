@@ -1,56 +1,46 @@
 "use strict";
 
-module.exports = function () {
 
-    if (!Creep.prototype._harvest) {
 
-        Creep.prototype._harvest = Creep.prototype.harvest;
+Creep.prototype.harvestTask = function () {
 
-        Creep.prototype.harvest = function () {
 
-            let target;
+    this.memoryWorking();
 
-            if (!this.memory.target)
-                this.targetSource();
+    if (!this.memory.working) {
 
-            target = Game.getObjectById(this.memory.target);
+        if (!this.memory.target)
+            this.getHarvestTarget();
 
-            if (target) {
-                let harvest = this._harvest(target);
+        let target = Game.getObjectById(this.memory.target),
+            harvest = this.harvest(target);
 
-                if (harvest === ERR_NOT_IN_RANGE) {
-                    this.travelTo(target);
-                    return true;
-                } else if (harvest === OK)
-                    return true;
-            } else
-                return false;
-        }
+        if (harvest === ERR_NOT_IN_RANGE)
+            this.travelTo(target);
+
+    } else
+        return 'OK';
+
+};
+
+
+
+module.exports = {
+
+    harvest: function () {
+
+        const
+            MY_ROOMS = _.filter(Game.rooms, {myRoom: true});
+
+        for (let room of MY_ROOMS)
+            _.filter(room.myCreeps, {memory: {working: false}}).forEach(creep => {
+                if (!creep.spawning)
+                    creep.harvestTask();
+            })
+
+
     }
 
-    if (!Creep.prototype._upgradeController) {
-
-        Creep.prototype._upgradeController = Creep.prototype.upgradeController;
-
-        Creep.prototype.upgradeController = function () {
-
-            let target;
-
-            if (!this.memory.target)
-                this.memory.target = this.room.controller.id;
-
-            target = Game.getObjectById(this.memory.target);
-
-            if (target) {
-                if (target.sign === undefined || target.sign.text !== 'Territory of the Twilight Kingdoms of the East')
-                    if (this.signController(target, 'Territory of the Twilight Kingdoms of the East') === ERR_NOT_IN_RANGE)
-                        this.travelTo(target);
-
-                if (this._upgradeController(target) === ERR_NOT_IN_RANGE)
-                    this.travelTo(target);
-            }
-        }
-    }
 };
 
 
