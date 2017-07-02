@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 Creep.prototype.harvestTask = function () {
 
 
@@ -23,24 +21,30 @@ Creep.prototype.harvestTask = function () {
 
 };
 
-
-
 module.exports = {
 
     harvest: function () {
 
         const
-            MY_ROOMS = _.filter(Game.rooms, {myRoom: true});
+            MY_ROOMS = _.filter(Game.rooms, function (room) {
+                return room.myRoom && room.energyAvailable < room.energyCapacityAvailable;
+            });
 
-        for (let room of MY_ROOMS)
-            _.filter(room.myCreeps, {memory: {working: false}}).forEach(creep => {
-                if (!creep.spawning)
-                    creep.harvestTask();
-            })
+        let roomCount = 0;
 
+        for (let room of MY_ROOMS) {
+            if (room.notWorkingCreeps.length === 0)
+                roomCount++;
+            else
+                room.notWorkingCreeps.forEach(creep => {
+                    if (!creep.spawning)
+                        creep.harvestTask();
+                })
+        }
 
+        //console.log(roomCount === MY_ROOMS.length);
+        return roomCount === MY_ROOMS.length;
     }
-
 };
 
 

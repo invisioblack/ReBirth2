@@ -1,3 +1,4 @@
+"use strict";
 
 global.getId = function () {
     if (Memory.globalId === undefined || Memory.globalId > 10000) {
@@ -7,22 +8,31 @@ global.getId = function () {
     return Memory.globalId;
 };
 
-global.QueuedAction = function ({id, action, stopResult, tickLimit, startTime}) {
+global.QueuedAction = function ({id, action, stopResult, tickLimit, startTime, roomName}) {
+
     this.id = id || getId();
-    this.action = id ? action : `return (${action.toString()})`;
-    this.stopResult = stopResult;
-    this.tickLimit = tickLimit || 100;
-    this.startTime = startTime || Game.time;
+
+
+/*
+    //BB(this);
+    this[roomName].id = id || getId();
+    this[roomName].action = id ? action : `return (${action.toString()})()`;
+    this[roomName].stopResult = stopResult;
+    this[roomName].tickLimit = tickLimit || 100;
+    this[roomName].startTime = startTime || Game.time;
+
+*/
 };
 
-QueuedAction.prototype.run = function () {
-    let func = Function(this.action);
+QueuedAction.prototype.run = function (roomName) {
+
+    let func = Function(this[roomName].action);
     try {
         let result = func();
-        if (result === this.stopResult) {
+        if (result === this[roomName].stopResult) {
             return false;
         }
-        if (Game.time - this.startTime >= this.tickLimit) {
+        if (Game.time - this[roomName].startTime >= this[roomName].tickLimit) {
             return false;
         }
     } catch (error) {
@@ -32,8 +42,10 @@ QueuedAction.prototype.run = function () {
     return true;
 };
 
-QueuedAction.prototype.add = function () {
-    Memory.queuedActions[this.id] = this;
+QueuedAction.prototype.add = function (roomName) {
+
+    console.log(roomName);
+    Memory.queuedActions[this[roomName]] = this;
 };
 
 QueuedAction.prototype.clear = function () {
@@ -41,15 +53,22 @@ QueuedAction.prototype.clear = function () {
 };
 
 global.runQueuedActions = function () {
+
     Object.keys(Memory.queuedActions || {})
-        .forEach(id => {
-            let action = new QueuedAction(Memory.queuedActions[id]);
-            if (!action.run()) action.clear();
+        .forEach(roomName => {
+            let action = new QueuedAction(Memory.queuedActions[roomName].id);
+            if (!action.run())
+                action.clear();
         });
 };
 
-global.queueAction = function (action, stopResult, tickLimit) {
+global.queueAction = function (action, stopResult, tickLimit, roomName) {
+
+    //console.log(action, stopResult, tickLimit, roomName);
+
     if (!Memory.queuedActions) Memory.queuedActions = {};
-    let newAction = new QueuedAction({action, stopResult, tickLimit});
-    newAction.add();
+    if (!Memory.queuedActions[roomName]) Memory.queuedActions[roomName] = {};
+    let newAction = new QueuedAction({action, stopResult, tickLimit, roomName});
+    console.log(newAction);
+    //newAction.add(roomName);
 };

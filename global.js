@@ -1,4 +1,6 @@
+"use strict";
 
+require('./functions');
 require('./room')();
 require('./roleScan')();
 require('./roles')();
@@ -8,15 +10,12 @@ require('./visual')();
 require('./visualRoom')();
 require('./spawner')();
 require('./properties');
-require('./functions');
 require('./queueAction');
 
 global.gameLoop = require('./gameLoop');
 global.profiler = require('./screeps-profiler');
 global.Traveller = require('./Traveler');
 global.task = require('./task');
-
-
 
 global.config = {
     profiler: {

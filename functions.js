@@ -1,7 +1,10 @@
 "use strict";
 
-
 global.blackBox = (x) => JSON.stringify(x, null, 2);
+
+global.BB = function (x) {
+    console.log(blackBox(x));
+};
 
 global.deleteCS = function (roomName) {
 
@@ -51,6 +54,24 @@ global.textColor = function (message, color = 2) {
 
     return '<font color="' + config.visuals.colors[color] + '" type="highlight">' + message + "</font>";
 
+};
+
+global.defineCachedGetter = function (proto, propertyName, fn) {
+    Object.defineProperty(proto, propertyName, {
+        get: function () {
+            if (this === proto || this === undefined)
+                return;
+            let result = fn.call(this, this);
+            Object.defineProperty(this, propertyName, {
+                value: result,
+                configurable: true,
+                enumerable: false
+            });
+            return result;
+        },
+        configurable: true,
+        enumerable: false
+    });
 };
 
 global.findErrorCode = function (status) {

@@ -450,3 +450,13 @@ Creep.prototype.contains = function (parts) {
 
     return _.some(this.body, bodyParts => parts.includes(bodyParts.type));
 };
+
+
+
+
+defineCachedGetter(Creep.prototype, 'carryTotal', c => _.sum(c.carry));
+defineCachedGetter(Creep.prototype, 'carryCapacityAvailable', c => c.carryCapacity - c.carryTotal);
+defineCachedGetter(Room.prototype, 'notWorkingCreeps', room => _.filter(room.myCreeps, {memory: {working: false}}));
+
+
+

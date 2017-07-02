@@ -10,15 +10,30 @@ module.exports = function () {
 
     let rooms,
         spawns,
+        action,
         currentRoom;
 
     garbageCollector();
 
-    runQueuedActions();
+
+
+
+
+
+
 
 
     // spawning, roadBuilding
     for (let room of MY_ROOMS) {
+
+        //console.log(room.name, Memory.queuedActions[room.name]);
+
+        //console.log(_.some(Memory.queuedActions, { 'roomName': room.name }));
+
+        if (room.notWorkingCreeps && !_.some(Memory.queuedActions, { 'roomName': room.name }))
+            queueAction(() => task.harvest(), true, 100, room.name);
+
+        runQueuedActions(room.name);
 
         room.buildRoads();
 
@@ -34,6 +49,11 @@ module.exports = function () {
                 spawns[0].roleScan();
         }
     }
+
+
+
+
+
 
     Object.keys(Game.creeps).forEach(creeps => {
 
@@ -134,6 +154,9 @@ let garbageCollector = function () {
             }
         });
     }
+
+
+
 };
 
 
