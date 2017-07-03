@@ -1,5 +1,8 @@
-"use strict";
-
+/**
+ * Used to create unique id numbers
+ * Author: Helam
+ * @returns {*|number}
+ */
 global.getId = function () {
     if (Memory.globalId === undefined || Memory.globalId > 10000) {
         Memory.globalId = 0;
@@ -8,31 +11,33 @@ global.getId = function () {
     return Memory.globalId;
 };
 
-global.QueuedAction = function ({id, action, stopResult, tickLimit, startTime, roomName}) {
+
+global.QueuedAction = function ({id, action, stopResult, tickLimit, startTime}) {
 
     this.id = id || getId();
-
-
-/*
-    //BB(this);
-    this[roomName].id = id || getId();
-    this[roomName].action = id ? action : `return (${action.toString()})()`;
-    this[roomName].stopResult = stopResult;
-    this[roomName].tickLimit = tickLimit || 100;
-    this[roomName].startTime = startTime || Game.time;
-
-*/
+    this.action = id ? action : `return (${action.toString()})()`;
+    this.stopResult = stopResult;
+    this.tickLimit = tickLimit || 100;
+    this.startTime = startTime || Game.time;
 };
 
-QueuedAction.prototype.run = function (roomName) {
-
-    let func = Function(this[roomName].action);
+/**
+ * INTERNAL USE ONLY.
+ * Run the queued action and return false if:
+ *  1. There is an error
+ *  2. The return value of the queued action is equal to the stopResult
+ *  3. The queued action has been run [tickLimit] number of times
+ * Author: Helam
+ * @returns {boolean}
+ */
+QueuedAction.prototype.run = function () {
+    let func = Function(this.action);
     try {
         let result = func();
-        if (result === this[roomName].stopResult) {
+        if (result === this.stopResult) {
             return false;
         }
-        if (Game.time - this[roomName].startTime >= this[roomName].tickLimit) {
+        if (Game.time - this.startTime >= this.tickLimit) {
             return false;
         }
     } catch (error) {
@@ -42,33 +47,43 @@ QueuedAction.prototype.run = function (roomName) {
     return true;
 };
 
-QueuedAction.prototype.add = function (roomName) {
-
-    console.log(roomName);
-    Memory.queuedActions[this[roomName]] = this;
+/**
+ * INTERNAL USE ONLY.
+ * Add the action to the queue.
+ * Author: Helam
+ */
+QueuedAction.prototype.add = function () {
+    Memory.queuedActions[this.id] = this;
 };
 
+/**
+ * INTERNAL USE ONLY.
+ * Remove the queued action from the queue.
+ * Author: Helam
+ */
 QueuedAction.prototype.clear = function () {
     delete Memory.queuedActions[this.id];
 };
 
+/**
+ * Put somewhere in the main loop.
+ * Calls all of the queued actions.
+ * Author: Helam
+ */
 global.runQueuedActions = function () {
-
     Object.keys(Memory.queuedActions || {})
-        .forEach(roomName => {
-            let action = new QueuedAction(Memory.queuedActions[roomName].id);
+        .forEach(id => {
+            let action = new QueuedAction(Memory.queuedActions[id]);
             if (!action.run())
                 action.clear();
         });
 };
 
-global.queueAction = function (action, stopResult, tickLimit, roomName) {
 
-    //console.log(action, stopResult, tickLimit, roomName);
+global.queueAction = function (action, stopResult, tickLimit) {
 
-    if (!Memory.queuedActions) Memory.queuedActions = {};
-    if (!Memory.queuedActions[roomName]) Memory.queuedActions[roomName] = {};
-    let newAction = new QueuedAction({action, stopResult, tickLimit, roomName});
-    console.log(newAction);
-    //newAction.add(roomName);
+    if (!Memory.queuedActions)
+        Memory.queuedActions = {};
+    let newAction = new QueuedAction({action, stopResult, tickLimit});
+    newAction.add();
 };

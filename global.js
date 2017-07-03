@@ -16,6 +16,7 @@ global.gameLoop = require('./gameLoop');
 global.profiler = require('./screeps-profiler');
 global.Traveller = require('./Traveler');
 global.task = require('./task');
+require('./regionDecomposing')();
 
 global.config = {
     profiler: {

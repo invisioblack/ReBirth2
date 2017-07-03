@@ -30,10 +30,10 @@ module.exports = function () {
 
                 case 'harvester':
 
-                    bodyParts.work = 2; // 200
+                    bodyParts.work = 1; // 100
                     bodyParts.carry = 1; // 50
                     bodyParts.move = 1; // 50
-                    size = 300;
+                    size = 200;
                     sizeLimit = 1;
                     break;
 

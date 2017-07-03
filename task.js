@@ -16,35 +16,32 @@ Creep.prototype.harvestTask = function () {
         if (harvest === ERR_NOT_IN_RANGE)
             this.travelTo(target);
 
-    } else
-        return 'OK';
+    }
 
 };
 
 module.exports = {
 
-    harvest: function () {
+    collectEnergy: function () {
 
-        const
-            MY_ROOMS = _.filter(Game.rooms, function (room) {
-                return room.myRoom && room.energyAvailable < room.energyCapacityAvailable;
+        let notWorkingCreeps = _.filter(Game.creeps, {memory: {working: false}});
+
+        if (notWorkingCreeps.length === 0)
+            return true;
+        else {
+            notWorkingCreeps.forEach(creep => {
+                if (!creep.spawning)
+                    creep.harvestTask();
             });
-
-        let roomCount = 0;
-
-        for (let room of MY_ROOMS) {
-            if (room.notWorkingCreeps.length === 0)
-                roomCount++;
-            else
-                room.notWorkingCreeps.forEach(creep => {
-                    if (!creep.spawning)
-                        creep.harvestTask();
-                })
+            return false;
         }
-
-        //console.log(roomCount === MY_ROOMS.length);
-        return roomCount === MY_ROOMS.length;
     }
+
+
+
+
+
+
 };
 
 
